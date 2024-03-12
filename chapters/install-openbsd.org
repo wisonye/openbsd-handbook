@@ -6,6 +6,8 @@
 
 Before burning the install media file to the USB, you better to destroy the existing USB partitions.
 
+**** MacOS
+
 If you're using =MacOS=, plug the USB in and run =diskutil disk= to list your USB device:
 
 #+BEGIN_SRC bash
@@ -50,14 +52,44 @@ If you run =diskutil list= again, you should see this:
 So, that means the existing partitions are gone.
 
 
+**** FreeBSD
+
+#+BEGIN_SRC bash
+  lsblk
+
+  # DEVICE         MAJ:MIN SIZE TYPE                                    LABEL MOUNT
+  # da0              1:188  29G MBR                                         - -
+  #   <FREE>         -:-   512B -                                           - -
+  #   da0s1          1:189 480K efi                                         - -
+  #   da0s4          1:190 664M !166                                        - -
+  #   <FREE>         -:-    28G -                                           - -
+#+END_SRC
+
+So, the =/dev/da0= is your USB, run the following command to erase the existing partitions:
+
+#+BEGIN_SRC bash
+  doas dd if=/dev/zero of=/dev/da0 bs=512 count=1 
+#+END_SRC
+
+
 *** Download IMG file and write to USB
 
-Find your mirror from [[https://www.openbsd.org/ftp.html][here]] and download the =install74.img=
+Find your mirror from [[https://www.openbsd.org/ftp.html][here]] and download the =install74.img=.
+
+For installing OpenBSD on Apple M1/M2 architecture, you should download =ARM64=!!!
 
 After that, write the IMG file to USB:
 
 #+BEGIN_SRC bash
-  sudo dd if=/Users/wison/Downloads/install74.img of=/dev/disk5 bs=1M
+  #
+  # MacOS
+  #
+  sudo dd if=$HOME/Downloads/install74.img of=/dev/disk5 bs=1M
+
+  #
+  # FreeBSD
+  #
+  doas dd if=$HOME/Downloads/install74.img of=/dev/da0 bs=1M
 #+END_SRC
 
 

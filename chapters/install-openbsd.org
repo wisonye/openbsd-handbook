@@ -95,12 +95,14 @@ After that, write the IMG file to USB:
 
 ** If you're installing OpenBSD on Appple M1/M2
 
-Follow this video to install =Asahi Linux Installer= and make sure choose =UEFI= only and then reboot and choose =OpenBSD USB= to boot.
+*** Remove the existing =Asahi Fedora= if you've already installed
+
+Follow this [[https://www.youtube.com/watch?v=10thOSWGrpc&list=PLlJZBob--XJOblzgXe3o9BMmzjsv97KRZ][video]] and jump to =Bonus= section and see how to remove installed =Asahi Fedora= beforing continue!!!
 
 
+*** Install/Re-install Ashahi installer
 
-
-Run the following command to run =Asahi Installer=:
+Run the following command to start =Asahi Installer=:
 
 #+BEGIN_SRC bash
   curl https://alx.sh | sh

@@ -1,0 +1,68 @@
+* Install =OpenBSD=
+
+** Create bootable USB install media
+
+*** Erase install media partition
+
+Before burning the install media file to the USB, you better to destroy the existing USB partitions.
+
+If you're using =MacOS=, plug the USB in and run =diskutil disk= to list your USB device:
+
+#+BEGIN_SRC bash
+  diskutil list 
+
+  #
+  # ... Ignore the internal SSD
+  #
+
+  # /dev/disk5 (external, physical):
+  #    #:                       TYPE NAME       SIZE       IDENTIFIER
+  #    0:      GUID_partition_scheme           *30.8 GB    disk5
+  #    1:                        EFI EFI        209.7 MB   disk5s1
+  #    2:       Microsoft Basic Data OPENBSD    30.4 GB    disk5s2
+  #                     (free space)            135.2 MB   -
+#+END_SRC
+
+So, the =/dev/disk5= is your USB. Run the following command to erase the existing partitions:
+
+#+BEGIN_SRC bash
+  #
+  # You have to unmount it first, otherwise, you're not
+  # allowed to overwrite it.
+  #
+  sudo diskutil unmountDisk /dev/disk5
+
+  #
+  # Now, erase the existing partitions
+  # allowed to overwrite it.
+  #
+  sudo dd if=/dev/zero of=/dev/disk5 bs=512 count=1
+#+END_SRC
+
+If you run =diskutil list= again, you should see this:
+
+#+BEGIN_SRC bash
+  /dev/disk5 (external, physical):
+     #:                       TYPE NAME                    SIZE       IDENTIFIER
+     0:                                                   *30.8 GB    disk5
+#+END_SRC
+
+So, that means the existing partitions are gone.
+
+
+*** Download IMG file and write to USB
+
+Find your mirror from [[https://www.openbsd.org/ftp.html][here]] and download the =install74.img=
+
+After that, write the IMG file to USB:
+
+#+BEGIN_SRC bash
+  sudo dd if=/Users/wison/Downloads/install74.img of=/dev/disk5 bs=1M
+#+END_SRC
+
+
+** If you're installing OpenBSD on Appple M1/M2
+
+Follow this video to install =Asahi Linux Installer= and make sure choose =UEFI= only and then reboot and choose =OpenBSD USB= to boot.
+
+

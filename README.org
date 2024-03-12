@@ -1,0 +1,3 @@
+* My =OpenBSD= handbook
+
+** Install OpenBSD

@@ -100,7 +100,45 @@ Follow this video to install =Asahi Linux Installer= and make sure choose =UEFI=
 
 
 
-** Install sets from USB
+Run the following command to run =Asahi Installer=:
+
+#+BEGIN_SRC bash
+  curl https://alx.sh | sh
+#+END_SRC
+
+If you don't free up the disk space, then you should choose this:
+
+#+BEGIN_SRC bash
+  Choose what to do:
+    r: Resize an existing partition to make space for a new OS
+#+END_SRC
+
+
+Once that is done, choose to install:
+
+#+BEGIN_SRC bash
+  Choose what to do:
+	f: Install an OS into free space
+#+END_SRC
+
+
+And then, choose this and follow the steps presented to you:
+
+#+BEGIN_SRC bash
+  Choose an OS to install:
+	5: UEFI environment only (m1n1 + U-Boot + ESP)
+#+END_SRC
+
+
+After that done, press =Enter= to shutdown and wait for =30= seconds. 
+
+Plug the USB into one of the type-C ports and hold down the =Power= button until you see =Loading startup options...=, and kick off the OpenBSD install process.
+
+
+** Install process
+
+*** Install sets from USB
+
 
 When it asks =Which disk is the root disk=, you can press =?= to list all the physical disks in your computer, then markdown the =USB= install media one (e.g. =sd1=).
 
@@ -111,4 +149,11 @@ When asking =Is the disk partition already mounted?= type =no=
 When asking =Which disk contains the install media?= type =sd1= (the disk name you markdown before)
 
 So you should be able to install sets via =disk=:)
+
+
+** After install process
+
+*** If you're installing OpenBSD on Appple M1/M2
+
+If you want to change the default boot OS, you can run =Startup Disk= in =MacOS=, then choose your preferred default boot OS.
 

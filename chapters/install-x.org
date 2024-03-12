@@ -1,0 +1,27 @@
+* Install =X=
+
+** If you're installing OpenBSD on Appple M1/M2
+
+There are some things that don't work yet. There is no GPU acceleration. Fortunately, the CPUs are fast enough that X11 still works well with sofware rendering. You will see some sluggishness scrolling in Chromium or Firefox though. Chromium performs miles ahead of Firefox in my testing, and I'm not exactly sure why. There's no way to control the display backlight brightness (as far as I know). Sound does not work, though playing a video in Chromium is so slow that it's not going to be a fun time anyway. There is no suspend or resume support.
+
+It's usable for me as a daily driver right now, despite these drawbacks, but I don't ask for much, so your mileage may vary. The only graphical application I use is Chromium, which works well enough that I can do what I want to do, with the exception of YouTube. I did find some tweaks that made things nicer. The trackpad can be made more usable by setting it to =tap-to-click=. Just add this line to =/etc/wsconsctl.conf=:
+
+
+#+BEGIN_SRC conf
+  mouse.tp.tapping=1,3,2
+#+END_SRC
+
+You may also want to increase the cursor speed, as it is rather slow in OpenBSD. xinput can do that, and I have the following in =~/.xsession=:
+
+#+BEGIN_SRC conf
+  xinput set-prop "/dev/wsmouse0" "Device Accel Constant Deceleration" 0.5
+#+END_SRC
+
+Scaling in X11 is at its best on this display at 2x, for my terrible eyes. I set this in =~/.xsession= like so:
+
+#+BEGIN_SRC conf
+  export GDK_SCALE=2.0
+  export QT_SCALE_FACTOR=2.0
+#+END_SRC
+
+That's all I have found necessary. Everything else works exactly as you would expect from OpenBSD. Many thanks to the Asahi team for putting together their installer, and to the OpenBSD devs for making it work on this hardware.

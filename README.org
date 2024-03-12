@@ -1,3 +1,6 @@
 * My =OpenBSD= handbook
 
 ** [[file:chapters/install-openbsd.org][Install OpenBSD]]
+** Install =DE (Desktop Environment)= or =WM (Window Manager)=
+*** [[file:chapters/install-x.org][Install X]]
+

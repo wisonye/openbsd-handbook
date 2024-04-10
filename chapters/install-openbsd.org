@@ -93,11 +93,58 @@ After that, write the IMG file to USB:
 #+END_SRC
 
 
-** If you're installing OpenBSD on Appple M1/M2
+** If you're installing =OpenBSD= on =Appple Silicon=
 
 *** Remove the existing =Asahi Fedora= if you've already installed
 
 Follow this [[https://www.youtube.com/watch?v=10thOSWGrpc&list=PLlJZBob--XJOblzgXe3o9BMmzjsv97KRZ][video]] and jump to =Bonus= section and see how to remove installed =Asahi Fedora= beforing continue!!!
+
+Basically, use =diskutil list= to locate the =EFI EFI-ASAHI= device like below:
+
+#+BEGIN_SRC bash
+  diskutil list
+
+  # 4:  EFI EFI - ASAHI  524.3MB disk0s4
+#+END_SRC
+
+
+And the, erase it like this:
+
+#+BEGIN_SRC bash
+  diskutil eraseVolume JHFS+ empty /dev/disk0s4
+#+END_SRC
+
+
+After that, open =Disk Utility=, and remove all =Asahi= partitions by the following steps:
+
+**** View -> Show All Devices
+
+**** Click the =APPLE SSD= (entire disk) on the side bar, and click =Partition=
+
+**** DO NOT TOUCH the following partitions:
+
+- Macintosh HD
+- First and last partitions (on the top and nearby the Macintosh partition)
+
+
+**** Delete all Asahi linux related partitions: Click on it and press =-= button to delete:
+
+If you do a =diskutil list= now:
+
+#+BEGIN_SRC bash
+  diskutil list
+
+  # 3:  Apple_APFS          Container disk2    2.5 GB    disk0s3
+  # 4:  Apple_HFS           empty              524.3 MB  disk0s4
+  # 5:  Linux Filesystem                       1.1 GB    disk0s5
+  # 6:  Linux Filesystem                       90 GB     disk0s6
+
+  # 7:  Apple_APFS_Recovery Container disk3    5.4 GB    disk0s7
+#+END_SRC
+
+Those =disk0s3/4/5/6= are Asahi partitions!!!
+
+Finaly, reboot.
 
 
 *** Install/Re-install Ashahi installer
@@ -134,10 +181,189 @@ And then, choose this and follow the steps presented to you:
 
 After that done, press =Enter= to shutdown and wait for =30= seconds. 
 
-Plug the USB into one of the type-C ports and hold down the =Power= button until you see =Loading startup options...=, and kick off the OpenBSD install process.
+
+*** Kick on the =OpenBSD= installer
+
+Plug the USB into one of the type-C ports and hold down the =Power= button until you see =Loading startup options...=, and select =UEFI boot=, then you should see the =MacOS Recovery= UI.
+
+Select your admin user and type the password, the =Asashi Linux Install (second step)= should be running in the terminal.
+
+Read and follow the prompt to finish the reset steps, after that, it will reboot and you will see the  =OpenBSD= installer!!!
 
 
-** Install process
+** Install process for =Apple Silicon=
+
+*** Network configuration
+
+#+BEGIN_SRC bash
+  System hostname? (short form, e.g. 'foo') my-openbsd
+
+  Available network interfaces are: bwfm0 vlan0.
+  Network interface to configure? (name, lladdr, '?', or 'done') [bwfm0]
+  Access point? (ESSID, 'any', List# or '?') [YOUR_SSID_HERE]
+  Security protocl? (O)pen, (W)ep, WPA-(P)SK [P]
+  WPA passphrase? (will echo) [YOUR_WIFI_PASSWORD_HERE]
+  IPv4 address for bwfm0? (or 'autoconf' or 'none') [autoconf]
+  IPv6 address for bwfm0? (or 'autoconf' or 'none') [none]
+  Available network interfaces are: vio0 vlan0.
+  Network interface to configure? (name, lladdr, '?', or 'done') [done]
+
+  #
+  # If you're connecting to hidden SSID, then DHCP will fail, you should choose 'none'.
+  #
+  Default IPv4 route? (IPv4 address or 'none') [YOUR_ROUTER_IP_HERE]
+
+  DNS domain name? (e.g. 'example.com') [my.domain] my-openbsd.domain
+
+  #
+  # Your router
+  #
+  DNS nameservers? (IP address list or 'none') [YOUR_ROUTER_IP_HERE]
+#+END_SRC
+
+
+*** Partitioning
+
+#+BEGIN_SRC bash
+  Available disks are: sd0
+  Which disk is the root disk? ('?' for details) [sd0] ?
+      sd0: ATA, BHYVE SATA DISK, 001  (0.6G)
+      sd1: NVMe, bhyve-NVMe, 1.0  (30.0G)
+  Available disks are: sd0 sd1.
+
+  #
+  # Super important to choose the 'sd1' instead of 'sd0'
+  #
+  Which disk is the root disk? ('?' for details) [sd0] sd1
+
+  Encrypt the root disk with a passphrase? [no]
+  No valid MBR or GPT.
+
+  #
+  # Super important to choose 'G'!!!
+  # Otherwise, it won't boot after installation!!!
+  #
+  Use (W)hole disk MBR, whole disk (G)PT or (E)dit? [whole] G
+  An EFI/GPT disk may not boot. Proceed? [no] yes
+  Setting OpenBSD GPT partition to whole sd1...done.
+  The auto-allocated layout for sd1 is:
+  #                size           offset  fstype [fsize bsize   cpg]
+    a:          1024.0M           532544  4.2BSD   2048 16384     1 # /
+    b:          2027.8M          2629696    swap
+    c:         30720.0M                0  unused
+    d:          1678.2M          6782624  4.2BSD   2048 16384     1 # /tmp
+    e:          2612.1M         10219616  4.2BSD   2048 16384     1 # /var
+    f:          3447.8M         15569248  4.2BSD   2048 16384     1 # /usr
+    g:           968.3M         22630304  4.2BSD   2048 16384     1 # /usr/X11R6
+    h:          3945.7M         24613440  4.2BSD   2048 16384     1 # /usr/local
+    i:           260.0M               64   MSDOS
+    j:          1889.5M         32694208  4.2BSD   2048 16384     1 # /usr/src
+    k:          5899.1M         36564000  4.2BSD   2048 16384     1 # /usr/obj
+    l:          6967.3M         48645376  4.2BSD   2048 16384     1 # /home
+
+  Use (A)uto layout, (E)dit auto layout, or create (C)ustom layout? [a] a
+
+  Available disks are: sd0.
+  Which disk do you wish to initialize? (or 'done') [done]
+#+END_SRC
+
+
+*** Install file sets
+
+#+BEGIN_SRC bash
+  Let's install the sets!
+  Location of sets? (disk http nfs or 'done') [http] disk
+  Is the disk partition already mounted? [no]
+  Available disks are: sd0 sd1.
+  Which disk contains the install media? (or 'done') [sd0]
+    a:          1358848             1024  4.2BSD   2048 16384 16142
+    i:              960               64   MSDOS
+  Available sd0 partitions are: a i.
+  Which sd0 partition has the install sets? (or 'done') [a]
+  Pathname to the sets? (or 'done') [7.4/amd64]
+
+  Select sets by entering a set name, a file name pattern or 'all'. De-select
+  sets by prepending a '-', e.g.: '-game*'. Selected sets are labelled '[X]'.
+      [X] bsd           [X] base74.tgz    [X] game74.tgz    [X] xfont74.tgz
+      [X] bsd.mp        [X] comp74.tgz    [X] xbase74.tgz   [X] xserv74.tgz
+      [X] bsd.rd        [X] man74.tgz     [X] xshare74.tgz
+#+END_SRC
+
+And here is the description for each file set:
+
+#+BEGIN_SRC fish
+  bsd	        The kernel (required)
+  bsd.mp	        The multi-processor kernel (only on some platforms)
+  bsd.rd	        The ramdisk kernel
+  base74.tgz	The base system (required)
+  comp74.tgz	The compiler collection, headers and libraries
+  man74.tgz	Manual pages
+  game74.tgz	Text-based games
+  xbase74.tgz	Base libraries and utilities for X11 (requires xshare74.tgz)
+  xfont74.tgz	Fonts used by X11
+  xserv74.tgz	X11's X servers
+  xshare74.tgz	X11's man pages, locale settings and includes
+#+END_SRC
+
+If you don't need =X=, then de-selection the following file sets:
+
+#+BEGIN_SRC bash
+Set name(s)? (or 'abort' or 'done') [done] -game*
+    [X] bsd           [X] base74.tgz    [ ] game74.tgz    [X] xfont74.tgz
+    [X] bsd.mp        [X] comp74.tgz    [X] xbase74.tgz   [X] xserv74.tgz
+    [X] bsd.rd        [X] man74.tgz     [X] xshare74.tgz
+Set name(s)? (or 'abort' or 'done') [done] -x*
+    [X] bsd           [X] base74.tgz    [ ] game74.tgz    [ ] xfont74.tgz
+    [X] bsd.mp        [X] comp74.tgz    [ ] xbase74.tgz   [ ] xserv74.tgz
+    [X] bsd.rd        [X] man74.tgz     [ ] xshare74.tgz
+Set name(s)? (or 'abort' or 'done') [done]
+#+END_SRC
+
+
+Then, continue
+
+#+BEGIN_SRC bash
+  Directory does not contain SHA256.sig. Continue without verification? [no] yes
+  Installing bsd          100% |**************************| 24750 KB    00:00
+  Installing bsd.mp       100% |**************************| 24845 KB    00:00
+  Installing bsd.rd       100% |**************************|  4550 KB    00:00
+  Installing base74.tgz   100% |**************************|   368 MB    00:06
+  Extracting etc.tgz      100% |**************************|   257 KB    00:00
+  Installing comp74.tgz   100% |**************************| 75644 KB    00:02
+  Installing man74.tgz    100% |**************************|  7831 KB    00:00
+  Location of sets? (disk http nfs or 'done') [done]
+#+END_SRC
+
+
+*** Timezone
+
+#+BEGIN_SRC bash
+  What timezone are you in? ('?' for list) [Canada/Mountain] Pacific/Auckland
+#+END_SRC
+
+
+*** Shutdown the VM
+
+#+BEGIN_SRC bash
+  CONGRATULATIONS! Your OpenBSD install has been successfully completed!
+
+  When you login to your new system the first time, please read your mail
+  using the 'mail' command.
+
+  Exit to (S)hell, (H)alt or (R)eboot? [reboot] h
+#+END_SRC
+
+
+And you have poweroff the VM manually, otherwise, reboot will kick start the installation process again!!!
+
+#+BEGIN_SRC bash
+  doas vm poweroff my-openbsd
+  Are you sure you want to forcefully poweroff this virtual machine (y/n)? y
+#+END_SRC
+
+
+
+
 
 *** Install sets from USB
 
@@ -153,9 +379,192 @@ When asking =Which disk contains the install media?= type =sd1= (the disk name y
 So you should be able to install sets via =disk=:)
 
 
-** After install process
 
-*** If you're installing OpenBSD on Appple M1/M2
+** Install process for =TH80=
 
-If you want to change the default boot OS, you can run =Startup Disk= in =MacOS=, then choose your preferred default boot OS.
+*** Network configuration
+
+#+BEGIN_SRC bash
+  System hostname? (short form, e.g. 'foo') my-openbsd
+
+  Available network interfaces are: bwfm0 vlan0.
+  Network interface to configure? (name, lladdr, '?', or 'done') [bwfm0]
+  Access point? (ESSID, 'any', List# or '?') [YOUR_SSID_HERE]
+  Security protocl? (O)pen, (W)ep, WPA-(P)SK [P]
+  WPA passphrase? (will echo) [YOUR_WIFI_PASSWORD_HERE]
+  IPv4 address for bwfm0? (or 'autoconf' or 'none') [autoconf]
+  IPv6 address for bwfm0? (or 'autoconf' or 'none') [none]
+  Available network interfaces are: vio0 vlan0.
+  Network interface to configure? (name, lladdr, '?', or 'done') [done]
+
+  #
+  # If you're connecting to hidden SSID, then DHCP will fail, you should choose 'none'.
+  #
+  Default IPv4 route? (IPv4 address or 'none') [YOUR_ROUTER_IP_HERE]
+
+  DNS domain name? (e.g. 'example.com') [my.domain] my-openbsd.domain
+
+  #
+  # Your router
+  #
+  DNS nameservers? (IP address list or 'none') [YOUR_ROUTER_IP_HERE]
+#+END_SRC
+
+
+*** Partitioning
+
+#+BEGIN_SRC bash
+  Available disks are: sd0
+  Which disk is the root disk? ('?' for details) [sd0] ?
+      sd0: ATA, BHYVE SATA DISK, 001  (0.6G)
+      sd1: NVMe, bhyve-NVMe, 1.0  (30.0G)
+  Available disks are: sd0 sd1.
+
+  #
+  # Super important to choose the 'sd1' instead of 'sd0'
+  #
+  Which disk is the root disk? ('?' for details) [sd0] sd1
+
+  Encrypt the root disk with a passphrase? [no]
+  No valid MBR or GPT.
+
+  #
+  # Super important to choose 'G'!!!
+  # Otherwise, it won't boot after installation!!!
+  #
+  Use (W)hole disk MBR, whole disk (G)PT or (E)dit? [whole] G
+  An EFI/GPT disk may not boot. Proceed? [no] yes
+  Setting OpenBSD GPT partition to whole sd1...done.
+  The auto-allocated layout for sd1 is:
+  #                size           offset  fstype [fsize bsize   cpg]
+    a:          1024.0M           532544  4.2BSD   2048 16384     1 # /
+    b:          2027.8M          2629696    swap
+    c:         30720.0M                0  unused
+    d:          1678.2M          6782624  4.2BSD   2048 16384     1 # /tmp
+    e:          2612.1M         10219616  4.2BSD   2048 16384     1 # /var
+    f:          3447.8M         15569248  4.2BSD   2048 16384     1 # /usr
+    g:           968.3M         22630304  4.2BSD   2048 16384     1 # /usr/X11R6
+    h:          3945.7M         24613440  4.2BSD   2048 16384     1 # /usr/local
+    i:           260.0M               64   MSDOS
+    j:          1889.5M         32694208  4.2BSD   2048 16384     1 # /usr/src
+    k:          5899.1M         36564000  4.2BSD   2048 16384     1 # /usr/obj
+    l:          6967.3M         48645376  4.2BSD   2048 16384     1 # /home
+
+  Use (A)uto layout, (E)dit auto layout, or create (C)ustom layout? [a] a
+
+  Available disks are: sd0.
+  Which disk do you wish to initialize? (or 'done') [done]
+#+END_SRC
+
+
+*** Install file sets
+
+#+BEGIN_SRC bash
+  Let's install the sets!
+  Location of sets? (disk http nfs or 'done') [http] disk
+  Is the disk partition already mounted? [no]
+  Available disks are: sd0 sd1.
+  Which disk contains the install media? (or 'done') [sd0]
+    a:          1358848             1024  4.2BSD   2048 16384 16142
+    i:              960               64   MSDOS
+  Available sd0 partitions are: a i.
+  Which sd0 partition has the install sets? (or 'done') [a]
+  Pathname to the sets? (or 'done') [7.4/amd64]
+
+  Select sets by entering a set name, a file name pattern or 'all'. De-select
+  sets by prepending a '-', e.g.: '-game*'. Selected sets are labelled '[X]'.
+      [X] bsd           [X] base74.tgz    [X] game74.tgz    [X] xfont74.tgz
+      [X] bsd.mp        [X] comp74.tgz    [X] xbase74.tgz   [X] xserv74.tgz
+      [X] bsd.rd        [X] man74.tgz     [X] xshare74.tgz
+#+END_SRC
+
+And here is the description for each file set:
+
+#+BEGIN_SRC fish
+  bsd	        The kernel (required)
+  bsd.mp	        The multi-processor kernel (only on some platforms)
+  bsd.rd	        The ramdisk kernel
+  base74.tgz	The base system (required)
+  comp74.tgz	The compiler collection, headers and libraries
+  man74.tgz	Manual pages
+  game74.tgz	Text-based games
+  xbase74.tgz	Base libraries and utilities for X11 (requires xshare74.tgz)
+  xfont74.tgz	Fonts used by X11
+  xserv74.tgz	X11's X servers
+  xshare74.tgz	X11's man pages, locale settings and includes
+#+END_SRC
+
+If you don't need =X=, then de-selection the following file sets:
+
+#+BEGIN_SRC bash
+Set name(s)? (or 'abort' or 'done') [done] -game*
+    [X] bsd           [X] base74.tgz    [ ] game74.tgz    [X] xfont74.tgz
+    [X] bsd.mp        [X] comp74.tgz    [X] xbase74.tgz   [X] xserv74.tgz
+    [X] bsd.rd        [X] man74.tgz     [X] xshare74.tgz
+Set name(s)? (or 'abort' or 'done') [done] -x*
+    [X] bsd           [X] base74.tgz    [ ] game74.tgz    [ ] xfont74.tgz
+    [X] bsd.mp        [X] comp74.tgz    [ ] xbase74.tgz   [ ] xserv74.tgz
+    [X] bsd.rd        [X] man74.tgz     [ ] xshare74.tgz
+Set name(s)? (or 'abort' or 'done') [done]
+#+END_SRC
+
+
+Then, continue
+
+#+BEGIN_SRC bash
+  Directory does not contain SHA256.sig. Continue without verification? [no] yes
+  Installing bsd          100% |**************************| 24750 KB    00:00
+  Installing bsd.mp       100% |**************************| 24845 KB    00:00
+  Installing bsd.rd       100% |**************************|  4550 KB    00:00
+  Installing base74.tgz   100% |**************************|   368 MB    00:06
+  Extracting etc.tgz      100% |**************************|   257 KB    00:00
+  Installing comp74.tgz   100% |**************************| 75644 KB    00:02
+  Installing man74.tgz    100% |**************************|  7831 KB    00:00
+  Location of sets? (disk http nfs or 'done') [done]
+#+END_SRC
+
+
+*** Timezone
+
+#+BEGIN_SRC bash
+  What timezone are you in? ('?' for list) [Canada/Mountain] Pacific/Auckland
+#+END_SRC
+
+
+*** Shutdown the VM
+
+#+BEGIN_SRC bash
+  CONGRATULATIONS! Your OpenBSD install has been successfully completed!
+
+  When you login to your new system the first time, please read your mail
+  using the 'mail' command.
+
+  Exit to (S)hell, (H)alt or (R)eboot? [reboot] h
+#+END_SRC
+
+
+And you have poweroff the VM manually, otherwise, reboot will kick start the installation process again!!!
+
+#+BEGIN_SRC bash
+  doas vm poweroff my-openbsd
+  Are you sure you want to forcefully poweroff this virtual machine (y/n)? y
+#+END_SRC
+
+
+
+
+
+*** Install sets from USB
+
+
+When it asks =Which disk is the root disk=, you can press =?= to list all the physical disks in your computer, then markdown the =USB= install media one (e.g. =sd1=).
+
+When asking =Location of sets?=, type =disk=.
+
+When asking =Is the disk partition already mounted?= type =no=
+
+When asking =Which disk contains the install media?= type =sd1= (the disk name you markdown before)
+
+So you should be able to install sets via =disk=:)
+
 

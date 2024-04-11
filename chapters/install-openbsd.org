@@ -387,89 +387,158 @@ So you should be able to install sets via =disk=:)
 #+BEGIN_SRC bash
   System hostname? (short form, e.g. 'foo') my-openbsd
 
-  Available network interfaces are: bwfm0 vlan0.
-  Network interface to configure? (name, lladdr, '?', or 'done') [bwfm0]
-  Access point? (ESSID, 'any', List# or '?') [YOUR_SSID_HERE]
-  Security protocl? (O)pen, (W)ep, WPA-(P)SK [P]
-  WPA passphrase? (will echo) [YOUR_WIFI_PASSWORD_HERE]
-  IPv4 address for bwfm0? (or 'autoconf' or 'none') [autoconf]
-  IPv6 address for bwfm0? (or 'autoconf' or 'none') [none]
-  Available network interfaces are: vio0 vlan0.
+  Available network interfaces are: igc0 iwx0 vlan0.
+
+  #
+  # Ethernet
+  #
+  Network interface to configure? (name, lladdr, '?', or 'done') [igc]
+  IPv4 address for igc0? (or 'autoconf' or 'none') [autoconf]
+  IPv6 address for igc0? (or 'autoconf' or 'none') [none]
+
+  #
+  # Wifi is not available at this moment, as ISO doesn't include firmware yet!!!
+  #
   Network interface to configure? (name, lladdr, '?', or 'done') [done]
 
-  #
-  # If you're connecting to hidden SSID, then DHCP will fail, you should choose 'none'.
-  #
-  Default IPv4 route? (IPv4 address or 'none') [YOUR_ROUTER_IP_HERE]
-
   DNS domain name? (e.g. 'example.com') [my.domain] my-openbsd.domain
+  Using DNS nameservers at 192.168.1.200
+#+END_SRC
+
+
+*** Enable services
+
+#+BEGIN_SRC bash
+  #
+  # For better console configuration after installation
+  #
+  Start sshd(8) by default? [yes]
 
   #
-  # Your router
+  # I don't use any display manager, so `no`
   #
-  DNS nameservers? (IP address list or 'none') [YOUR_ROUTER_IP_HERE]
+  Do you want the X Window System to be started by xenodm(1)? [no]
+#+END_SRC
+
+
+*** Timezone
+
+#+BEGIN_SRC bash
+  What timezone are you in? ('?' for list) [Pacific/Auckland]
 #+END_SRC
 
 
 *** Partitioning
 
 #+BEGIN_SRC bash
-  Available disks are: sd0
+  Available disks are: sd0 sd1 sd2
   Which disk is the root disk? ('?' for details) [sd0] ?
-      sd0: ATA, BHYVE SATA DISK, 001  (0.6G)
-      sd1: NVMe, bhyve-NVMe, 1.0  (30.0G)
-  Available disks are: sd0 sd1.
+      sd0: NVMe, Samsung SSD 970, 4B2Q (931.5G)
+      sd1: NVMe, Samsung SSD 970, 4B2Q (931.5G)
+      sd2: SanDisk, Ultra USB 3.0. ... (28.6G)
+  Available disks are: sd0 sd1 sd2
 
   #
-  # Super important to choose the 'sd1' instead of 'sd0'
+  # `sd0` should be my `FreeBSD`, then choose `sd1` for `OpenBSD`
   #
   Which disk is the root disk? ('?' for details) [sd0] sd1
 
-  Encrypt the root disk with a passphrase? [no]
+  Encrypt the root disk with a (P)assphrase or (k)eydisk? [no]
   No valid MBR or GPT.
 
   #
-  # Super important to choose 'G'!!!
-  # Otherwise, it won't boot after installation!!!
+  # Make sure to use `GPT` partitions, otherwise, it won't boot!!!
   #
-  Use (W)hole disk MBR, whole disk (G)PT or (E)dit? [whole] G
-  An EFI/GPT disk may not boot. Proceed? [no] yes
+  Use (W)hole disk MBR, whole disk (G)PT or (E)dit? [gpt] G
   Setting OpenBSD GPT partition to whole sd1...done.
   The auto-allocated layout for sd1 is:
   #                size           offset  fstype [fsize bsize   cpg]
-    a:          1024.0M           532544  4.2BSD   2048 16384     1 # /
-    b:          2027.8M          2629696    swap
-    c:         30720.0M                0  unused
-    d:          1678.2M          6782624  4.2BSD   2048 16384     1 # /tmp
-    e:          2612.1M         10219616  4.2BSD   2048 16384     1 # /var
-    f:          3447.8M         15569248  4.2BSD   2048 16384     1 # /usr
-    g:           968.3M         22630304  4.2BSD   2048 16384     1 # /usr/X11R6
-    h:          3945.7M         24613440  4.2BSD   2048 16384     1 # /usr/local
-    i:           260.0M               64   MSDOS
-    j:          1889.5M         32694208  4.2BSD   2048 16384     1 # /usr/src
-    k:          5899.1M         36564000  4.2BSD   2048 16384     1 # /usr/obj
-    l:          6967.3M         48645376  4.2BSD   2048 16384     1 # /home
+    a:              1.G               64   4.2BSD   2048 16384     1 # /
+    b:            64.0G          2097216    swap
+    c:           921.5G                0  unused
+    d:             4.0G        XXXXXXXXX  4.2BSD   2048 16384     1 # /tmp
+    e:           119.8G        XXXXXXXXX  4.2BSD   2048 16384     1 # /var
+    f:              30G        XXXXXXXXX  4.2BSD   2048 16384     1 # /usr
+    g:             1.0G        XXXXXXXXX  4.2BSD   2048 16384     1 # /usr/X11R6
+    h:            20.0G        XXXXXXXXX  4.2BSD   2048 16384     1 # /usr/local
+    i:             0.3G               64  MSDOS
+    j:             3.0G        XXXXXXXXX  4.2BSD   2048 16384     1 # /usr/src
+    k:             6.0G        XXXXXXXXX  4.2BSD   2048 16384     1 # /usr/obj
+    l:           300.0G        XXXXXXXXX  4.2BSD   2048 16384     1 # /home
 
   Use (A)uto layout, (E)dit auto layout, or create (C)ustom layout? [a] a
+#+END_SRC
 
-  Available disks are: sd0.
+
+By default, it doesn't use the the whole disk (at least on my =1TB= SSD), so you have to press =e= (Edit auto layout) to confirm that you have =free= space or not!!!
+
+#+BEGIN_SRC bash
+  #
+  # Print paritions in `GB` unit
+  #
+  sd1> p G
+  OpenBSD area: 64-195325168; size 931.5G; free: 382.7G
+  #                size           offset  fstype [fsize bsize   cpg]
+    # ... ignore above
+    l:           300.0G        XXXXXXXXX  4.2BSD   2048 16384     1 # /home
+#+END_SRC
+
+
+So, you need to put all the =free= spaces (=382.7G=) into the =k: /home= partition like this:
+
+#+BEGIN_SRC bash
+  #
+  # Reisze `k` partition
+  #
+  sd1> R l
+  [+|-]new size (with unit): [xxxxxxxx] + 382.7G
+
+  #
+  # You can see the promot add a `*` at the end, that means layout has been modified.
+  #
+  sd1*>
+#+END_SRC
+
+
+Now, print the paritions to confirm again, should have no free spaces:
+
+#+BEGIN_SRC bash
+  #
+  # Print paritions in `GB` unit
+  #
+  sd1> p G
+  OpenBSD area: 64-195325168; size 931.5G; free: 0.0G
+  #                size           offset  fstype [fsize bsize   cpg]
+    # ... ignore above
+    k:           682.7G        XXXXXXXXX  4.2BSD   2048 16384     1 # /home
+#+END_SRC
+
+
+Then save and quit the layout editor:
+
+#+BEGIN_SRC bash
+  sd1*> w
+  sd1> q
+
+  Available disks are: sd0 sd2
   Which disk do you wish to initialize? (or 'done') [done]
 #+END_SRC
 
 
 *** Install file sets
 
+Let's install the sets!
+
 #+BEGIN_SRC bash
-  Let's install the sets!
   Location of sets? (disk http nfs or 'done') [http] disk
   Is the disk partition already mounted? [no]
-  Available disks are: sd0 sd1.
-  Which disk contains the install media? (or 'done') [sd0]
+  Available disks are: sd0 sd1 sd2
+  Which disk contains the install media? (or 'done') [sd0] sd2
     a:          1358848             1024  4.2BSD   2048 16384 16142
     i:              960               64   MSDOS
-  Available sd0 partitions are: a i.
-  Which sd0 partition has the install sets? (or 'done') [a]
-  Pathname to the sets? (or 'done') [7.4/amd64]
+  Available sd2 partitions are: a i.
+  Which sd2 partition has the install sets? (or 'done') [a]
+  Pathname to the sets? (or 'done') [7.5/amd64]
 
   Select sets by entering a set name, a file name pattern or 'all'. De-select
   sets by prepending a '-', e.g.: '-game*'. Selected sets are labelled '[X]'.
@@ -524,47 +593,13 @@ Then, continue
 #+END_SRC
 
 
-*** Timezone
+
+*** Firmware update
+
+If your ethernet works at this momen, the firmeware should updated automatically like below:
 
 #+BEGIN_SRC bash
-  What timezone are you in? ('?' for list) [Canada/Mountain] Pacific/Auckland
+  Multipcessor machine; using bsd.mp instead of bsd.
+  fw_update: add intel, inteldrm, iwx; update none 
+  Relinking to create unque kernel...
 #+END_SRC
-
-
-*** Shutdown the VM
-
-#+BEGIN_SRC bash
-  CONGRATULATIONS! Your OpenBSD install has been successfully completed!
-
-  When you login to your new system the first time, please read your mail
-  using the 'mail' command.
-
-  Exit to (S)hell, (H)alt or (R)eboot? [reboot] h
-#+END_SRC
-
-
-And you have poweroff the VM manually, otherwise, reboot will kick start the installation process again!!!
-
-#+BEGIN_SRC bash
-  doas vm poweroff my-openbsd
-  Are you sure you want to forcefully poweroff this virtual machine (y/n)? y
-#+END_SRC
-
-
-
-
-
-*** Install sets from USB
-
-
-When it asks =Which disk is the root disk=, you can press =?= to list all the physical disks in your computer, then markdown the =USB= install media one (e.g. =sd1=).
-
-When asking =Location of sets?=, type =disk=.
-
-When asking =Is the disk partition already mounted?= type =no=
-
-When asking =Which disk contains the install media?= type =sd1= (the disk name you markdown before)
-
-So you should be able to install sets via =disk=:)
-
-

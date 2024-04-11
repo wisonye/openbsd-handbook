@@ -1,0 +1,201 @@
+* Troubleshooting boot issues
+
+My =TH80= can't boot after fresh installation, it hangs on the following output message:
+
+#+BEGIN_SRC bash
+  efifb at mainbus0 not configured
+  uhidev0 at uhub0 port 3 configuration 1 interface 0 "AONE Varmilo Keyboard"... addr 2 
+  uhidev0: iclass 3/1
+  ukbd0 at uhidev0: 8 variable keys, 5 key codes
+#+END_SRC
+
+
+Then I tried to boot manually below and failed:
+
+#+BEGIN_SRC bash
+  > boot hd1a:/bsd.rd
+  openbsd cannot open hd1a:/etc/random.seed: Invalid argument
+  booting hd0a:/bsd: open hd0a:/bsd: Invalid argument
+  failed(22). will try /bsd
+#+END_SRC
+
+Then I tried to boot in configuration mode:
+
+#+BEGIN_SRC bash
+
+  > boot -c
+  UKC>
+#+END_SRC
+
+But my keyboard doesn't work in that situation, it can't type! It should be the case that the keyboard driver hasn't been loaded yet at =boot -c= step.
+
+So, how to solve that???
+
+** Boot in USB installer and change =OpenBSD= boot config
+
+When booting by the USB install image, all keyboard drivers work perfectly.
+
+After booting into the installer, press =s= to go into =shell= mode!!!
+
+*** Create device special files
+
+Because I want to confirm which SSD is the =OpenBSD= one, I have to run =fdisk sd0= and =fdisk sd1= to print the SSD partition tables.
+
+Before using =fdisk sd0=, you must create the device file, as =/dev/sd0= and =/dev/sd1= don't exist in shell mode yet.
+
+Here is the way to create them:
+
+#+BEGIN_SRC bash
+  cd /dev
+  sh MAKEDEV sd0
+  sh MAKEDEV sd1
+#+END_SRC
+
+After that, =/dev/sd0= and =/dev/sd1= will be available.
+
+So, here is the output of =fdisk sd1=:
+
+#+BEGIN_SRC bash
+  fdisk sd1
+
+  # Disk: sd1
+  # #: type
+  # -------------------------------------------
+  # 0: EFI Sys
+  # 1: OpenBSD
+#+END_SRC
+
+That means =sd1= is the =OpenBSD= SSD.
+
+
+*** Mount the =/= partition and =/usr= partition
+
+Now, I  need to mount the related partitions before running =config -ef /bsd= to change the boot config.
+
+Here is my =OpenBSD= partitions:
+
+#+BEGIN_SRC bash
+  a:              1.G               64   4.2BSD   2048 16384     1 # /
+  b:            64.0G          2097216    swap
+  c:           921.5G                0  unused
+  d:             4.0G        XXXXXXXXX  4.2BSD   2048 16384     1 # /tmp
+  e:           119.8G        XXXXXXXXX  4.2BSD   2048 16384     1 # /var
+  f:              30G        XXXXXXXXX  4.2BSD   2048 16384     1 # /usr
+  g:             1.0G        XXXXXXXXX  4.2BSD   2048 16384     1 # /usr/X11R6
+  h:            20.0G        XXXXXXXXX  4.2BSD   2048 16384     1 # /usr/local
+  i:             0.3G               64  MSDOS
+  j:             3.0G        XXXXXXXXX  4.2BSD   2048 16384     1 # /usr/src
+  k:             6.0G        XXXXXXXXX  4.2BSD   2048 16384     1 # /usr/obj
+  l:           300.0G        XXXXXXXXX  4.2BSD   2048 16384     1 # /home
+#+END_SRC
+
+That's why I mount them like this:
+
+#+BEGIN_SRC bash
+  #
+  # Root
+  #
+  mount /dev/sd1a /mnt
+
+  #
+  # You need this partition to run the binaries
+  # that are stored in `/usr/bin`
+  #
+  mount /dev/sd1f /mnt/usr
+
+  #
+  # You need those partitions to run `config -ef /bsd`
+  #
+  mount /dev/sd1d /mnt/tmp
+  mount /dev/sd1e /mnt/var
+#+END_SRC
+
+
+After that, run =mount= to confirm all partitions have been mounted correctly:
+
+#+BEGIN_SRC bash
+  mount
+
+  # /dev/rd0a on / types ffs (Local)
+  # /dev/sd1a on /mnt types ffs (Local)
+  # /dev/sd1f on /usr types ffs (Local)
+  # /dev/sd1d on /tmp types ffs (Local)
+  # /dev/sd1e on /var types ffs (Local)
+#+END_SRC
+
+
+*** =chroot= into =/mnt=
+
+#+BEGIN_SRC bash
+  chroot /mnt
+
+  #
+  # Run `uname -a` to confirm that I'm in the installed OpenBSD!!!
+  #
+  /usr/bin/uname -a
+  OpenBSD 7.5 RAMDISK_CD+76 amd64
+#+END_SRC
+
+
+*** Change boot configuration
+
+The kernel configuration file to overwrite
+
+#+BEGIN_SRC bash
+  ls -lht /bsd
+
+  #-rwx------ 1 root wheel 25.3M /bsd
+#+END_SRC
+
+
+#+BEGIN_SRC bash
+  #
+  # -e: Allows the modification of kernel device configuration
+  # -f: Overwrite the infile kernel binary with the modified kernel
+  #
+  config -ef /bsd
+
+  ukc>
+#+END_SRC
+
+In that =ukc>= prompt, you're able to run all commands that available in the =boot -c=, here is the man page: https://man.openbsd.org/boot_config.8
+
+For my case, I need to disable the =uhidev= driver
+
+#+BEGIN_SRC bash
+  ukc> disable uhidev
+  # 310 uhidev* disabled
+
+  #
+  # Run `quit` to save and exit `config`
+  #
+  quit
+  # Saving modified kernel
+#+END_SRC
+
+
+*** Exit and reboot
+
+
+#+BEGIN_SRC bash
+  #
+  # Exit `chroot`
+  #
+  exit
+
+  #
+  # Sync all changes to disk
+  #
+  sync
+
+  #
+  # Umount all partitions
+  #
+  umount /mnt/tmp
+  umount /mnt/var
+  umount /mnt/usr
+  umount /mnt
+#+END_SRC
+
+
+Then, reboot and remove the USB installer.

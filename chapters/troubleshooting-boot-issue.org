@@ -118,9 +118,9 @@ After that, run =mount= to confirm all partitions have been mounted correctly:
 
   # /dev/rd0a on / types ffs (Local)
   # /dev/sd1a on /mnt types ffs (Local)
-  # /dev/sd1f on /usr types ffs (Local)
-  # /dev/sd1d on /tmp types ffs (Local)
-  # /dev/sd1e on /var types ffs (Local)
+  # /dev/sd1f on /mnt/usr types ffs (Local)
+  # /dev/sd1d on /mnt/tmp types ffs (Local)
+  # /dev/sd1e on /mnt/var types ffs (Local)
 #+END_SRC
 
 
@@ -166,6 +166,29 @@ For my case, I need to disable the =uhidev= driver
   ukc> disable uhidev
   # 310 uhidev* disabled
 
+  ukc> disable uhub
+  # 301 uhub* disabled
+  # 302 uhub* disabled
+
+  #
+  # After this, `efifb0 at mainbus0: 3840x2160, 32bpp` comes back
+  #
+  ukc> disable inteldrm
+
+  #
+  # Disable the following `acpi` related, but you can't disable `acpi`,
+  # as on modern machines, it's all but required. The controller for
+  # your hard drive didn't attach, so the kernel was unable to find
+  # your root device!!!
+  #
+  ukc> disable acpivideo
+  ukc> disable acpibtn
+  ukc> disable acpiac
+  ukc> disable acpibat
+  ukc> disable acpihid
+  ukc> disable acpipwrres
+  ukc> disable acpicpu
+
   #
   # Run `quit` to save and exit `config`
   #
@@ -199,3 +222,42 @@ For my case, I need to disable the =uhidev= driver
 
 
 Then, reboot and remove the USB installer.
+
+
+
+
+** Still no luck with running OpenBSD on =TH80=
+
+After disabling all the above drivers/modules, the boot process still hangs on the following lines:
+
+#+BEGIN_SRC bash
+  efifb0 at mainbus0: 3840x2160, 32bpp
+  wsdisplay0 at efifb0 mux 1: console (std, vt100 emulation), using wskbd0
+  wsdisplay0: screen 1-5 added (std, vt100 emulation)
+  ugen0 at uhub0 port 14 "Intel Bluetooth" rev 2.01/0.00 addr 2
+  vscsi0 at root
+  scsibus2 at vscsi0: 256 targets
+  softraid0 at root
+  scsibus3 at softraid0: 256 targets
+  root on sd0a (210073f02338a2ec.a) swap on sd0b dump on sd0b
+#+END_SRC
+
+
+** How to use =vi= in installer shell
+
+If you run =vi= in installer shell, you will see the following error:
+
+#+BEGIN_SRC bash
+  vi: unknown: unknown terminal type 
+#+END_SRC
+
+
+Here is how to fix it:
+
+#+BEGIN_SRC bash
+  TERM=vt100
+  export TERM
+#+END_SRC
+
+
+Now, =vi= should work with no problem.

@@ -1,0 +1,141 @@
+* Update firmware
+
+If you don't have internet during the installation, you must go through the following steps to update all firmware, as the installer doesn't have firmware support.
+
+** Download all firmware files
+
+Plz replace =7.5= to the version you're working on:
+
+http://firmware.openbsd.org/firmware/7.5/
+
+For example, you saved all downloaded files into =~/Downloads/openbsd_fw_udpate=:
+
+#+BEGIN_SRC bash
+    ls ~/Downloads/openbsd_fw_update
+
+    # -rw-r--r--  1 wison wison  2.5K Apr 12 16:55 index.txt
+    # -rw-r--r--  1 wison wison  2.5K Apr 12 16:55 SHA256.sig
+    # -rw-r--r--  1 wison wison   65K Apr 12 16:45 wpi-firmware-3.2p1.tgz
+    # -rw-r--r--  1 wison wison   43K Apr 12 16:45 vmm-firmware-1.16.3.tgz
+    # -rw-r--r--  1 wison wison   67K Apr 12 16:45 uvideo-firmware-1.2p3.tgz
+    # -rw-r--r--  1 wison wison   24K Apr 12 16:45 upgt-firmware-1.1p5.tgz
+    # -rw-r--r--  1 wison wison   72K Apr 12 16:44 uath-firmware-2.0p1.tgz
+    # -rw-r--r--  1 wison wison  3.3M Apr 12 16:44 radeondrm-firmware-20240220.tgz
+    # -rw-r--r--  1 wison wison  3.0M Apr 12 16:44 qwx-firmware-20240115.tgz
+    # -rw-r--r--  1 wison wison  9.7M Apr 12 16:44 qcpas-firmware-20230625.tgz
+    # -rw-r--r--  1 wison wison  158K Apr 12 16:44 pgt-firmware-1.2p5.tgz
+    # -rw-r--r--  1 wison wison   49K Apr 12 16:44 otus-firmware-1.0p1.tgz
+    # -rw-r--r--  1 wison wison  5.2K Apr 12 16:43 ogx-firmware-20171128.tgz
+    # -rw-r--r--  1 wison wison  1.5M Apr 12 16:43 mwx-firmware-20240115.tgz
+    # -rw-r--r--  1 wison wison   28K Apr 12 16:43 mtw-firmware-20230804.tgz
+    # -rw-r--r--  1 wison wison  137K Apr 12 16:43 malo-firmware-1.4p5.tgz
+    # -rw-r--r--  1 wison wison   13M Apr 12 16:43 iwx-firmware-20230629.tgz
+    # -rw-r--r--  1 wison wison  3.1M Apr 12 16:42 iwn-firmware-5.11p1.tgz
+    # -rw-r--r--  1 wison wison  5.3M Apr 12 16:42 iwm-firmware-20230330.tgz
+    # -rw-r--r--  1 wison wison   12M Apr 12 16:42 intel-firmware-20240312v0.tgz
+    # -rw-r--r--  1 wison wison  266K Apr 12 16:42 iwi-firmware-3.1p4.tgz
+    # -rw-r--r--  1 wison wison  244K Apr 12 16:42 ipw-firmware-1.3p4.tgz
+    # -rw-r--r--  1 wison wison  3.7M Apr 12 16:42 inteldrm-firmware-20240220.tgz
+    # -rw-r--r--  1 wison wison   38K Apr 12 16:41 bwi-firmware-1.4p5.tgz
+    # -rw-r--r--  1 wison wison   11M Apr 12 16:41 bwfm-firmware-20200316.1.3p3.tgz
+    # -rw-r--r--  1 wison wison  172K Apr 12 16:41 athn-firmware-1.1p4.tgz
+    # -rw-r--r--  1 wison wison   27M Apr 12 16:40 amdgpu-firmware-20240220.tgz
+    # -rw-r--r--  1 wison wison   20K Apr 12 16:40 arm64-qcom-dtb-firmware-1.5.tgz
+    # -rw-r--r--  1 wison wison  768K Apr 12 16:40 apple-boot-firmware-1.3.tgz
+    # -rw-r--r--  1 wison wison   60K Apr 12 16:39 amd-firmware-20240220.tgz
+    # -rw-r--r--  1 wison wison  129K Apr 12 16:39 acx-firmware-1.4p6.tgz
+#+END_SRC
+
+
+** Copy all firmware files into installer USB
+
+Plug in the installer USB and list all partitions:
+
+#+BEGIN_SRC bash
+  lsblk
+
+  # DEVICE         MAJ:MIN SIZE TYPE                                          LABEL MOUNT
+  # da0              1:176  29G MBR                                               - -
+  #   <FREE>         -:-    16M -                                                 - -
+  #   da0s1          1:177 8.0M fat32lba                               msdosfs/BOOT -
+  #   da0s4          1:179 531M !166                                              - -
+  #   <FREE>         -:-    28G -                                                 - -
+#+END_SRC
+
+
+You can reuse the =/dev/da0s4= parition to save all downloaded firmware files:
+
+#+BEGIN_SRC bash
+  #
+  # Mount the `UFS` partition into `/mnt/temp`
+  #
+  doas mkdir /mnt/temp
+  doas mount /dev/da0s4 /mnt/temp/ 
+
+  #
+  # Remove the install files to free spaces
+  #
+  doas rm -rf /mnt/temp/7.5
+
+  #
+  # Copy
+  #
+  doas cp -rvf ~/Downloads/openbsd_fw_update /mnt/temp/ 
+
+  #
+  # Umount after done
+  #
+  sync
+  doas umount /mnt/temp
+#+END_SRC
+
+
+** Now, install on =OpenBSD=
+
+Plug the USB in and list the disk names:
+
+#+BEGIN_SRC bash
+  sysctl hw.disknames
+
+  # hw.disknames=sd0:bfb4775bb8397569,sd1:3a55b0f9259f96f0
+#+END_SRC
+
+
+Show all partitions to confirm:
+
+#+BEGIN_SRC bash
+  disklabel sd1  
+
+  # ....
+  #         size    offset    fstype
+  # a:                        4.2BSD
+  # c:                        unused
+  # i:                        MSDOS
+#+END_SRC
+
+
+Then mount the =/dev/sd1a=:
+
+#+BEGIN_SRC bash
+  mount /dev/sd1a /mnt
+#+END_SRC
+
+
+Now, run firmware update:
+
+#+BEGIN_SRC bash
+  fw_update -av -p /mnt/openbsd_fw_update
+
+  # Verfiy apple-boot-firmware-1.3.tgz ... done
+  # Verfiy bwfm-firmware-20200316.1.3p3.tgz ... done
+  # Install apple-boot-firmware-1.3.tgz ... done
+  # Install bwfm-firmware-20200316.1.3p3.tgz ... done
+  # fw_update: add apple-boot.bwfm; update done
+
+  #
+  # Umount
+  #
+  umount /mnt
+#+END_SRC
+
+Reboot to take affect.

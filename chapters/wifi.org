@@ -1,0 +1,44 @@
+* WIFI
+
+** If you're installing =OpenBSD= on =Appple Silicon=
+
+The default NIC should be =bwfm0=, you can confirm by running =dmesg=:
+
+#+BEGIN_SRC bash
+  dmesg | grep bwfm
+
+  # bwfm0 at pci1 dev 0 function 0 "Broadcom BCM4378" rev 0x07: msi
+  # bwfm0: address xx:xx:xx:xx:xx:xx
+#+END_SRC
+
+=ifconfig= also show the NIC name:
+
+#+BEGIN_SRC bash
+  ifconfg
+
+  # bwfm0: flags=
+  #        index
+  #        groups: wlan
+  #        media: IEEE802.11 autoselect
+  #        status: no network
+  #        ieeee80211: nwid ""
+#+END_SRC
+
+
+*** Create =/etc/hostname.NIC_NAME= with the following settings
+
+For example, my MacBookAir2 NIC name is =bwfm0=, then create =/etc/hostname.bwfm0=.
+
+#+BEGIN_SRC bash
+  nwid YOUR_SSID_HERE wpakey YOUR_WIFI_PASSWORD_HERE
+  inet autoconf
+#+END_SRC
+
+You have to use =nwid (Network ID)= instead of =join= if you're trying to connect to hidden SSID, as =join= only for connecting to public WIFI!!!
+
+
+*** Restrat =/etc/netstart= script to take effect
+
+#+BEGIN_SRC bash
+  sh /etc/netstart
+#+END_SRC

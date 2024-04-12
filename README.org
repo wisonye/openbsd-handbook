@@ -1,6 +1,8 @@
 * My =OpenBSD= handbook
 
 ** [[file:chapters/install-openbsd.org][Install OpenBSD]]
+** [[file:chapters/update-firmware.org][Update firmware]]
+** [[file:chapters/wifi.org][WIFI]]
 ** [[file:chapters/troubleshooting-boot-issue.org][Troubleshooting boot issues]]
 ** Install =DE (Desktop Environment)= or =WM (Window Manager)=
 *** [[file:chapters/install-x.org][Install X]]

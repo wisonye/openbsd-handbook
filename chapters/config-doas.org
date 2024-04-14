@@ -1,0 +1,11 @@
+* Config =doas=
+
+#+BEGIN_SRC bash
+  cp -rvf /etc/examples/doas.conf /etc/doas.conf 
+#+END_SRC
+
+Then, edit =/etc/doas.conf= with the following settings:
+
+#+BEGIN_SRC conf
+  permit persist keepenv setenv { $PATH } YOUR_USERNAME as root
+#+END_SRC

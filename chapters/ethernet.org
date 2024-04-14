@@ -1,0 +1,39 @@
+* Ethernet
+
+** Get your ethernet NIC name
+
+#+BEGIN_SRC bash
+  ifconfig | grep -B4 Ethernet
+
+  # vio0: flags=808843<UP,BROADCAST,RUNNING,SIMPLEX,MULTICAST,AUTOCONF4> mtu 1500
+  #         lladdr 00:1c:42:d1:95:7d
+  #         index 1 priority 0 llprio 3
+  #         groups: egress
+  #         media: Ethernet autoselect
+#+END_SRC
+
+That means =vio0= is the ethernet NIC name.
+
+
+*** Create =/etc/hostname.NIC_NAME= with the following settings
+
+For example, my VM NIC name is =vio0=, then create =/etc/hostname.vio0= witht the following settings:
+
+#+BEGIN_SRC conf
+  #
+  # If you want DHCP IPv4
+  #
+  inet autoconf
+
+  #
+  # If you want static IPv4
+  #
+  # inet 192.168.1.x 255.255.255.0
+#+END_SRC
+
+
+*** Restrat =/etc/netstart= script to take effect
+
+#+BEGIN_SRC bash
+  sh /etc/netstart
+#+END_SRC

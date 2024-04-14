@@ -1,0 +1,156 @@
+* Package management
+
+The best documentation is [[https://www.openbsd.org/faq/faq15.html#Intro][here]].
+
+** How to set mirror
+
+*** Bash
+
+#+BEGIN_SRC bash
+  #
+  # Use mirror, replace the `7.5` and `aarch64` to your
+  # OpenBSD version and your CPU architecture!!!
+  #
+  export PKG_PATH=https://mirror.fsmg.org.nz/pub/OpenBSD/7.5/packages/aarch64/
+
+  #
+  # If you've already upgraded to the `current` snapshot,
+  # so you have to use the `snapshot` as version.
+  #
+  # You can add a `-v` option to see the `PKG_PATH`
+  # settings when using `pkg` command.
+  #
+  # For example: `pkg_info -v -Q rust`
+  #
+  export PKG_PATH=https://mirror.fsmg.org.nz/pub/OpenBSD/snapshots/packages/aarch64/
+#+END_SRC
+
+
+*** Fish
+
+#+BEGIN_SRC bash
+  #
+  # Use mirror, replace the `7.5` and `aarch64` to your
+  # OpenBSD version and your CPU architecture!!!
+  #
+  set --export PKG_PATH https://mirror.fsmg.org.nz/pub/OpenBSD/7.5/packages/aarch64/
+
+  #
+  # If you've already upgraded to the `current` snapshot,
+  # so you have to use the `snapshot` as version.
+  #
+  # You can add a `-v` option to see the `PKG_PATH`
+  # settings when using `pkg` command.
+  #
+  # For example: `pkg_info -v -Q rust`
+  #
+  export --export PKG_PATH https://mirror.fsmg.org.nz/pub/OpenBSD/snapshots/packages/aarch64/
+#+END_SRC
+
+
+** Install system patch
+
+#+BEGIN_SRC bash
+  doas syspatch
+
+  # Get/Verify syspatch75-001_xserver... 100% |*************************************************************************|  4303 KB    00:00
+  # Installing patch 001_xserver
+  # Errata can be reviewed under /var/syspatch
+#+END_SRC
+
+Btw, =syspatch= only for =release=, it doesn't work for available in =current snapshot=, as =current snapshot= is the latest developer branch which there is NO any system patch in concept.
+
+
+** Basic usage:
+
+You can add a =-v= option to all the following commands to see the =PKG_PATH= setting.
+
+#+BEGIN_SRC bash
+  #
+  # Search package (to install)
+  #
+  pkg_info -Q SERACH_KEYWORD_HERE
+
+  #
+  # Search package that already installed
+  #
+  pkg_info -a | grep SERACH_KEYWORD_HERE
+
+  #
+  # List installed package file list (install to where)
+  #
+  pkg_info -L INSTALLED_PACKGE_NAME_HERE
+
+  #
+  # Query package info (after you know the full packge name)
+  #
+  pkg_info PACKAGE_NAME_HERE
+
+  #
+  # Install
+  #
+  doas pkg_add PACKAGE_NAME_HERE
+
+  #
+  # Remove
+  #
+  doas pkg_delete PACKAGE_NAME_HERE
+
+  #
+  # Remove unused dependencies
+  #
+  doas pkg_delete -a
+
+  #
+  # Check consistency of installed packages (to find the broken
+  # installed packages)
+  #
+  pkg_check
+#+END_SRC
+
+
+** How to search package more faster?
+
+By default, =pkg_info -Q= ALWAYS will search online (with your mirror) to get back the result, but that's a slow way. You can try =pkglocatedb=:
+
+#+BEGIN_SRC bash
+  doas pkg_add pkglocatedb
+#+END_SRC
+
+
+So, you're able to search like this:
+
+#+BEGIN_SRC bash
+  pkglocate noevim
+#+END_SRC
+
+It will search all conditions including =package name, path, filename=, but sometimes if you only want to search for the =package name= (to install), that's the downside of using =pkglocate=.
+
+
+** Update all installed packages (after upgrading to current snapshot)
+
+Upgrade all installed packages (some packages you might have to re-install):
+
+#+BEGIN_SRC bash
+    #
+    # `-U`: Update dependencies if required before installing
+    #       the new package(s).
+    # `-u`: update all installed packages.
+    #
+    # `-v`: verbose mode
+    #
+    doas pkg_add -Uuv
+#+END_SRC
+
+
+** How to export installed packge list to another newly installed OpenBSD
+
+#+BEGIN_SRC bash
+  pkg_info -mz | tee ~/installed_pkg_list.txt
+#+END_SRC
+
+After copying to the new installed =OpenBSD=, you can install them like this:
+
+#+BEGIN_SRC bash
+  doas pkg_add -l installed_pkg_list
+#+END_SRC

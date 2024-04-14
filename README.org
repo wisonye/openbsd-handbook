@@ -2,8 +2,12 @@
 
 ** [[file:chapters/install-openbsd.org][Install OpenBSD]]
 ** [[file:chapters/update-firmware.org][Update firmware]]
+** [[file:chapters/ethernet.org][Ethernet]]
 ** [[file:chapters/wifi.org][WIFI]]
 ** [[file:chapters/troubleshooting-boot-issue.org][Troubleshooting boot issues]]
+** [[file:chapters/config-doas.org][Config doas]]
+** [[file:chapters/package_management.org][Package management]]
+** [[file:chapters/install-basic-tools-and-setup.org][Install basic tools and setup]]
 ** Install =DE (Desktop Environment)= or =WM (Window Manager)=
 *** [[file:chapters/install-x.org][Install X]]
 

@@ -9,5 +9,11 @@
 ** [[file:chapters/install-basic-tools-and-setup.org][Install basic tools and setup]]
 ** Install =DE (Desktop Environment)= or =WM (Window Manager)=
 *** [[file:chapters/install-x.org][Install X]]
+** System configuration
+*** [[file:chapters/virtual-consoles.org][Virtual consoles]]
+*** [[file:chapters/managing-services.org][Managing services]]
+*** [[file:chapters/list-hardware-info.org][List hardare info]]
+*** [[file:chapters/power-saving-control.org][Power saving control]]
 ** How to
 *** [[file:chapters/troubleshooting-boot-issue.org][How to troubleshooting boot issues]]
+*** [[file:chapters/how-to-reset-root-password.org][How to reset root password]]

@@ -1,0 +1,79 @@
+* Power saving control
+
+** Enable =apmd= daemon
+
+#+BEGIN_SRC bash
+  rcctl enable apmd
+  rcctl set apmd flags -A
+#+END_SRC
+
+Reboot or restart service by running =rcctl restart apmd=
+
+
+** Flags description:
+
+=-A=: Start apmd in automatic performance adjustment mode (the default).
+
+=-H=: Start apmd in manual performance adjustment mode, initialising =hw.setperf= to =100=.
+
+=-L=: Start apmd in manual performance adjustment mode, initialising =hw.setperf= to =0=.
+
+=-t seconds=: apmd periodically polls the APM driver for the current power state.  If the battery charge level changes substantially or the external power status changes, the new status is logged.  The polling rate defaults to once per 10 minutes, but may be specified using the =-t= command-line flag.
+
+=-Z percent=: Automatically hibernate the system if no AC is connected and the estimated battery life is equal or below percent.
+
+=-z percent=: Automatically suspend the system if no AC is connected and the estimated battery life is equal or below percent. If both =-Z= and =-z= are specified, the last one will supersede the other.  After a resume, the effect of those options is inhibited for 60 seconds.
+
+
+** Query settings
+
+*** Display the external charger (AC) status
+
+#+BEGIN_SRC bash
+  apm -a
+#+END_SRC
+
+=0= means disconnected,
+=1= means connected,
+=2= means backup power source,
+=255= means unknown.
+
+
+*** Display the battery status
+
+#+BEGIN_SRC bash
+  apm -b
+#+END_SRC
+
+=0= means high,
+=1= means low,
+=2= means critical,
+=3= means charging,
+=4= means absent,
+=255= means unknown.
+
+
+*** Display the estimated battery lifetime, in percent.
+
+#+BEGIN_SRC bash
+  apm -l 
+#+END_SRC
+
+
+*** Display the estimated battery lifetime, in minutes
+
+#+BEGIN_SRC bash
+  apm -m
+#+END_SRC
+
+If charging, the estimated time to fully charge is displayed instead.
+
+
+*** Display the performance adjustment mode
+
+#+BEGIN_SRC bash
+  apm -P 
+#+END_SRC
+
+=0= means manual mode.
+=1= means automatic mode.

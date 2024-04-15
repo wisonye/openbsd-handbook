@@ -1,0 +1,207 @@
+* List hardware info
+
+** List all disks
+
+#+BEGIN_SRC bash
+  sysctl hw.disknames
+  # hw.disknames=sd0:e44d0d9d0890f6b7,cd0:
+#+END_SRC
+
+
+** List all partitions of the given disk
+
+*** You can install =lsblk=
+
+#+BEGIN_SRC bash
+  lsblk
+
+  # lsblk: read_disk(): opendev(cd0): Input/output error
+  # NAME   SIZE TYPE   COMMENT
+  # sd0     64G SCSI   my-openbsd-0 SSD
+  # ├─sd0a 1.0G 4.2BSD /
+  # ├─sd0b 4.2G swap
+  # ├─sd0c  64G unused
+  # ├─sd0d 3.9G 4.2BSD /tmp
+  # ├─sd0e 6.9G 4.2BSD /var
+  # ├─sd0f 6.7G 4.2BSD /usr
+  # ├─sd0g 1.0G 4.2BSD /usr/X11R6
+  # ├─sd0h 8.9G 4.2BSD /usr/local
+  # ├─sd0i 260M MSDOS
+  # ├─sd0j 2.5G 4.2BSD /usr/src
+  # ├─sd0k 6.0G 4.2BSD /usr/obj
+  # └─sd0l  22G 4.2BSD /home
+#+END_SRC
+
+
+*** Use built-in =diskable=
+
+#+BEGIN_SRC bash
+  disklabel sd0
+
+  # # /dev/rsd0c:
+  # type: SCSI
+  # disk: SCSI disk
+  # label: my-openbsd-0 SSD
+  # duid: e44d0d9d0890f6b7
+  # flags:
+  # bytes/sector: 512
+  # sectors/track: 63
+  # tracks/cylinder: 255
+  # sectors/cylinder: 16065
+  # cylinders: 8354
+  # total sectors: 134217728
+  # boundstart: 565248
+  # boundend: 134217728
+
+  # 16 partitions:
+  # #                size           offset  fstype [fsize bsize   cpg]
+  #   a:          2097152           565248  4.2BSD   2048 16384 12960 # /
+  #   b:          8899856          2662400    swap                    # none
+  #   c:        134217728                0  unused
+  #   d:          8388576         11562272  4.2BSD   2048 16384 12960 # /tmp
+  #   e:         14614784         19950848  4.2BSD   2048 16384 12960 # /var
+  #   f:         14188128         34565632  4.2BSD   2048 16384 12960 # /usr
+  #   g:          2097152         48753760  4.2BSD   2048 16384 12960 # /usr/X11R6
+  #   h:         18771328         50850912  4.2BSD   2048 16384 12960 # /usr/local
+  #   i:           532480            32768   MSDOS
+  #   j:          5295200         69622240  4.2BSD   2048 16384 12960 # /usr/src
+  #   k:         12582912         74917440  4.2BSD   2048 16384 12960 # /usr/obj
+  #   l:         46717376         87500352  4.2BSD   2048 16384 12960 # /home 
+#+END_SRC
+
+
+** List CPU
+
+#+BEGIN_SRC bash
+  lscpu
+
+  # Architecture:            arm64
+  # Byte Order:              Little Endian
+  # Active CPU(s):           8
+  # Total CPU(s):            8
+  # Model name:              Unknown
+  # CPU MHz:                 0 
+#+END_SRC
+
+
+** List PCI info
+
+#+BEGIN_SRC bash
+  pcidump
+
+  # Domain /dev/pci0:
+  #  0:1:0: Intel 82801I HD Audio
+  #  0:2:0: Intel 82801FB USB
+  #  0:3:0: NEC xHCI
+  #  0:5:0: Qumranet Virtio Network
+  #  0:9:0: Parallels VMCI 
+#+END_SRC
+
+
+Add a =-v= if you need extra info:
+
+#+BEGIN_SRC bash
+  pcidump -v
+
+  # Domain /dev/pci0:
+  #  0:1:0: Intel 82801I HD Audio
+  #         0x0000: Vendor ID: 8086, Product ID: 293e
+  #         0x0004: Command: 0216, Status: 0010
+  #         0x0008: Class: 04 Multimedia, Subclass: 03 HD Audio,
+  #                 Interface: 00, Revision: 00
+  #         0x000c: BIST: 00, Header Type: 00, Latency Timer: 00,
+  #                 Cache Line Size: 00
+  #         0x0010: BAR mem 32bit addr: 0x10000000/0x00004000
+  #         0x0014: BAR empty (00000000)
+  #         0x0018: BAR empty (00000000)
+  #         0x001c: BAR empty (00000000)
+  #         0x0020: BAR empty (00000000)
+  #         0x0024: BAR empty (00000000)
+  #         0x0028: Cardbus CIS: 00000000
+  #         0x002c: Subsystem Vendor ID: 1ab8 Product ID: 0400
+  #         0x0030: Expansion ROM Base Address: 00000000
+  #         0x0038: 00000000
+  #         0x003c: Interrupt Pin: 01 Line: ff Min Gnt: 00 Max Lat: 00
+  #         0x0060: Capability 0x05: Message Signalled Interrupts (MSI)
+  #                 Enabled: yes; 1 vectors (1 enabled)
+  #  0:2:0: Intel 82801FB USB
+  #         0x0000: Vendor ID: 8086, Product ID: 265c
+  #         0x0004: Command: 0017, Status: 0280
+  #         0x0008: Class: 0c Serial Bus, Subclass: 03 USB,
+  #                 Interface: 20, Revision: 02
+  #         0x000c: BIST: 00, Header Type: 00, Latency Timer: 00,
+  #                 Cache Line Size: 00
+  #         0x0010: BAR mem 32bit addr: 0x10008000/0x00000400
+  #         0x0014: BAR empty (00000000)
+  #         0x0018: BAR empty (00000000)
+  #         0x001c: BAR empty (00000000)
+  #         0x0020: BAR empty (00000000)
+  #         0x0024: BAR empty (00000000)
+  #         0x0028: Cardbus CIS: 00000000
+  #         0x002c: Subsystem Vendor ID: 1ab8 Product ID: 0400
+  #         0x0030: Expansion ROM Base Address: 00000000
+  #         0x0038: 00000000
+  #         0x003c: Interrupt Pin: 01 Line: ff Min Gnt: 00 Max Lat: 00
+  #  0:3:0: NEC xHCI
+  #         0x0000: Vendor ID: 1033, Product ID: 0194
+  #         0x0004: Command: 0016, Status: 0290
+  #         0x0008: Class: 0c Serial Bus, Subclass: 03 USB,
+  #                 Interface: 30, Revision: 04
+  #         0x000c: BIST: 00, Header Type: 00, Latency Timer: 00,
+  #                 Cache Line Size: 00
+  #         0x0010: BAR mem 32bit addr: 0x10007000/0x00001000
+  #         0x0014: BAR empty (00000000)
+  #         0x0018: BAR empty (00000000)
+  #         0x001c: BAR empty (00000000)
+  #         0x0020: BAR empty (00000000)
+  #         0x0024: BAR empty (00000000)
+  #         0x0028: Cardbus CIS: 00000000
+  #         0x002c: Subsystem Vendor ID: 1ab8 Product ID: 0400
+  #         0x0030: Expansion ROM Base Address: 00000000
+  #         0x0038: 00000000
+  #         0x003c: Interrupt Pin: 01 Line: ff Min Gnt: 00 Max Lat: 00
+  #         0x00e0: Capability 0x05: Message Signalled Interrupts (MSI)
+  #                 Enabled: yes; 1 vectors (1 enabled)
+  #  0:5:0: Qumranet Virtio Network
+  #         0x0000: Vendor ID: 1af4, Product ID: 1000
+  #         0x0004: Command: 0007, Status: 0010
+  #         0x0008: Class: 02 Network, Subclass: 00 Ethernet,
+  #                 Interface: 00, Revision: 00
+  #         0x000c: BIST: 00, Header Type: 00, Latency Timer: 00,
+  #                 Cache Line Size: 00
+  #         0x0010: BAR mem 32bit addr: 0x10006000/0x00001000
+  #         0x0014: BAR mem 32bit addr: 0x10005000/0x00001000
+  #         0x0018: BAR empty (00000000)
+  #         0x001c: BAR empty (00000000)
+  #         0x0020: BAR empty (00000000)
+  #         0x0024: BAR empty (00000000)
+  #         0x0028: Cardbus CIS: 00000000
+  #         0x002c: Subsystem Vendor ID: 1ab8 Product ID: 0001
+  #         0x0030: Expansion ROM Base Address: 00000000
+  #         0x0038: 00000000
+  #         0x003c: Interrupt Pin: 01 Line: ff Min Gnt: 00 Max Lat: 00
+  #         0x0040: Capability 0x01: Power Management
+  #                 State: D0
+  #         0x00f4: Capability 0x11: Extended Message Signalled Interrupts (MSI-X)
+  #                 Enabled: yes; table size 3 (BAR 1:0)
+  #  0:9:0: Parallels VMCI
+  #         0x0000: Vendor ID: 1ab8, Product ID: 4000
+  #         0x0004: Command: 0010, Status: 0290
+  #         0x0008: Class: ff (unknown), Subclass: 00 (unknown),
+  #                 Interface: 00, Revision: 00
+  #         0x000c: BIST: 00, Header Type: 00, Latency Timer: 00,
+  #                 Cache Line Size: 00
+  #         0x0010: BAR mem 32bit addr: 0x10004000/0x00001000
+  #         0x0014: BAR empty (00000000)
+  #         0x0018: BAR empty (00000000)
+  #         0x001c: BAR empty (00000000)
+  #         0x0020: BAR empty (00000000)
+  #         0x0024: BAR empty (00000000)
+  #         0x0028: Cardbus CIS: 00000000
+  #         0x002c: Subsystem Vendor ID: 1ab8 Product ID: 0400
+  #         0x0030: Expansion ROM Base Address: 00000000
+  #         0x0038: 00000000
+  #         0x003c: Interrupt Pin: 01 Line: ff Min Gnt: 00 Max Lat: 00
+  #         0x0040: Capability 0x05: Message Signalled Interrupts (MSI)
+  #                 Enabled: no; 4 vectors (1 enabled) 
+#+END_SRC

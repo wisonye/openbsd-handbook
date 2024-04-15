@@ -1,0 +1,68 @@
+* Vritual consoles
+
+It means the TTY console you're using to login.
+
+You can press =CTRL+ALT+F1~F9= to change TTY console. They're defined =/etc/ttys= file.
+
+
+https://www.openbsd.org/faq/faq7.html#Consoles
+
+** Use =wsconsctl= to change virtual console settings
+
+*** Live and temporary change
+
+#+BEGIN_SRC bash
+  #
+  # List all keyboard related settings
+  #
+  doas wsconsctl keyboard
+
+  # keyboard.type=usb
+  # keyboard.bell.pitch=400
+  # keyboard.bell.period=100
+  # keyboard.bell.volume=50
+  # keyboard.bell.pitch.default=400
+  # keyboard.bell.period.default=100
+  # keyboard.bell.volume.default=50
+  # wsconsctl: Use explicit arg to view keyboard.map.
+  # keyboard.repeat.del1=100
+  # keyboard.repeat.deln=100
+  # keyboard.repeat.del1.default=100
+  # keyboard.repeat.deln.default=100
+  # keyboard.ledstate=0
+  # keyboard.encoding=us
+
+  #
+  # Change settings
+  #
+  doas wsconsctl keyboard.repeat.del1.default=50
+  # keyboard.repeat.del1.default -> 50
+#+END_SRC
+
+Change will lost after reboot.
+
+
+*** Change permanently
+
+To make changes permanent, put it into =/etc/wsconsctl.conf=.
+
+#+BEGIN_SRC bash
+  keyboard.repeat.del1.default=50
+  keyboard.encoding=us
+#+END_SRC
+
+
+** Custom key mapping
+
+#+BEGIN_SRC bash
+  #
+  # List all mapping
+  #
+  wsconsctl keyboard.map
+
+  #
+  # Map `Caps_Lock` to `Escape`
+  #
+  wsconsctl keyboard.map+="keysym Caps_Lock = Escape"
+#+END_SRC
+

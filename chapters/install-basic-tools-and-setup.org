@@ -57,7 +57,6 @@ Relogin to take effect.
 ** Install =Rust= when needed
 
 #+BEGIN_SRC bash
-  rustup component add rust-analyzer
+  doas pkg_add rust rust-analyzer rust-clippy rust-gdb rust-rust-fmt rust-src
+  cargo install du-dust cargo-cache
 #+END_SRC
-
-Then relogin to take effects.

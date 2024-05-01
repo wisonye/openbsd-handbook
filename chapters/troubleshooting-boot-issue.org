@@ -572,9 +572,12 @@ For my case, I need to disable the =uhidev= driver
   ukc> quit
 
   #
-  # Now, boot the default kernel
+  # THIS IS ONLY FOR `boot -c` on hardsidk!!!
+  # If you're booting via USB, don't do this!!!
   #
-  boot> boot sd0a:/bsd
+  # Now, boot the default kernel.
+  #
+  # boot> boot sd0a:/bsd
 #+END_SRC
 
 
